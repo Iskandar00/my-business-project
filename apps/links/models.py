@@ -1,0 +1,37 @@
+from django.conf import settings
+from django.db import models
+
+from apps.general.models import General
+from apps.general.unique_id import generate_unique_id
+
+class Link(models.Model):
+    id_generate = models.CharField(
+        unique=True,
+        max_length=8,
+        editable=False,
+        default=generate_unique_id
+    )
+    user = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        limit_choices_to={
+            'is_active': True,
+            'is_deleted': False,
+        },
+        related_name='links',
+    )
+    product = models.ForeignKey(
+        to='products.Product',
+        on_delete=models.CASCADE,
+        related_name='links',
+        limit_choices_to={'is_active': True},
+    )
+    title = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def url_generate(self):
+        sayt_url = General.objects.get().sayt_url
+        return f'{sayt_url}/products/{self.id_generate}'
+
+    def __str__(self):
+        return self.title
