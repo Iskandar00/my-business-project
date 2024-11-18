@@ -35,11 +35,14 @@ class Order(models.Model):
         YETKAZILMOQDA = 3, 'YETKAZILMOQDA'
         QAYTA_QUNGIROQ = 4, 'QAYTA_QUNGIROQ'
         YETKAZIB_BERILDI = 5, 'YETKAZIB_BERILDI'
+        QAYTIB_KELDI = 6, 'QAYTIB_KELDI'
 
     status = models.IntegerField(choices=StatusChoices.choices, default=StatusChoices.YANGI)
     admin = models.ForeignKey('users.CustomUser', on_delete=models.SET_NULL, blank=True, null=True)
     product = models.ForeignKey('products.Product', on_delete=models.SET_NULL, blank=True, null=True)
-    admin_money = models.DecimalField(max_digits=20, decimal_places=2)
+    total_balance = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    estimated_balance = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+
     product_count = models.PositiveSmallIntegerField(default=1, validators=[MinValueValidator(1)])
     buyer_name = models.CharField(max_length=50)
     phone_number = models.CharField(
@@ -56,15 +59,21 @@ class Order(models.Model):
     order_date = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-
         if self.link:
             self.admin = self.link.user
             self.product = self.link.product
-            self.admin_money = self.product.admin_money * self.product_count
+
+            # Only calculate admin_money if status is "YETKAZIB_BERILDI"
+            if self.status == self.StatusChoices.YETKAZIB_BERILDI:
+                self.total_balance = self.product.admin_money * self.product_count
         else:
             raise ValidationError("create_link must have associated user and product.")
 
         super().save(*args, **kwargs)
+
+    def update(self):
+        pass
+
 
     def __str__(self):
         return f"Order {self.id} for {self.buyer_name} from {self.area}"

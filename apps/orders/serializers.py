@@ -16,7 +16,7 @@ class OrderSerializer(serializers.ModelSerializer):
         link_id = self.context['request'].query_params.get('link')
         link = get_object_or_404(Link, id_generate=link_id)
 
-        link.user.total_balance += link.product.admin_money * validated_data['product_count']
+        link.user.estimated_balance += link.product.admin_money * validated_data['product_count']
         link.user.save()
 
         Order.objects.create(**validated_data, link=link)
