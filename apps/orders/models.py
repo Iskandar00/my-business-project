@@ -1,12 +1,18 @@
 from django.core.validators import RegexValidator, MinValueValidator
 from django.db import models
 from rest_framework.exceptions import ValidationError
-
-from apps.links.models import Link
+"""
+{
+    "buyer_name": "kimdir",
+    "phone_number": "+998907654321",
+    "area": 1,
+    "product_count": 4
+}
+"""
 
 
 class Order(models.Model):
-    link = models.ForeignKey('links.Link', on_delete=models.CASCADE)
+    link = models.ForeignKey('links.Link', on_delete=models.SET_NULL, null=True)
 
     class AreaChoices(models.IntegerChoices):
         TOSHKENT = 1, 'Toshkent'
@@ -31,8 +37,8 @@ class Order(models.Model):
         YETKAZIB_BERILDI = 5, 'YETKAZIB_BERILDI'
 
     status = models.IntegerField(choices=StatusChoices.choices, default=StatusChoices.YANGI)
-    admin = models.ForeignKey('users.CustomUser', on_delete=models.SET_NULL, null=True)
-    product = models.ForeignKey('products.Product', on_delete=models.SET_NULL, null=True)
+    admin = models.ForeignKey('users.CustomUser', on_delete=models.SET_NULL, blank=True, null=True)
+    product = models.ForeignKey('products.Product', on_delete=models.SET_NULL, blank=True, null=True)
     admin_money = models.DecimalField(max_digits=20, decimal_places=2)
     product_count = models.PositiveSmallIntegerField(default=1, validators=[MinValueValidator(1)])
     buyer_name = models.CharField(max_length=50)
@@ -49,29 +55,16 @@ class Order(models.Model):
     area = models.IntegerField(choices=AreaChoices.choices)
     order_date = models.DateTimeField(auto_now_add=True)
 
-    def clean(self):
+    def save(self, *args, **kwargs):
 
-        if self.link and self.link.user and self.link.product:
+        if self.link:
             self.admin = self.link.user
             self.product = self.link.product
             self.admin_money = self.product.admin_money * self.product_count
         else:
             raise ValidationError("create_link must have associated user and product.")
 
-        super().clean()
-
-    # def save_model(self, request, obj, form, change):
-    #     product_id = request.POST.get('product_id')
-    #     if product_id is None:
-    #         raise ValidationError("Product ID is required.")
-    #
-    #     link = Link.objects.filter(product__id_generate=product_id)
-    #     if not link.exists():
-    #         raise ValidationError("No such link exists.")
-    #
-    #     link_instance = link.first()
-    #     link_instance.user.total_balance += link_instance.product.admin_money * obj.product_count
-    #     link_instance.user.save()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Order {self.id} for {self.buyer_name} from {self.area}"

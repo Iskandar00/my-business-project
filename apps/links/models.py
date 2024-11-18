@@ -4,6 +4,7 @@ from django.db import models
 from apps.general.models import General
 from apps.general.unique_id import generate_unique_id
 
+
 class Link(models.Model):
     id_generate = models.CharField(
         unique=True,
@@ -31,7 +32,12 @@ class Link(models.Model):
 
     def url_generate(self):
         sayt_url = General.objects.get().sayt_url
-        return f'{sayt_url}/products/{self.id_generate}'
+        return f'{sayt_url}/orders/?link={self.id_generate}'
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        verbose_name = 'Link'
+        verbose_name_plural = 'Links'
+

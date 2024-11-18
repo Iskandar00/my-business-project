@@ -28,15 +28,11 @@ class ProductLike(models.Model):
     def __str__(self):
         return f"{self.pk}"
 
-    def clean(self):
+    def save(self, *args, **kwargs):
         if self.user and self.product:
-            # Check if there's a dislike by the same user on this product
             dislike_obj = self.product.dislikes.filter(user=self.user).last()
+            print(dislike_obj)
             if dislike_obj:
                 dislike_obj.delete()
 
-        super().clean()
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
         super().save(*args, **kwargs)

@@ -4,6 +4,15 @@ from rest_framework.permissions import IsAuthenticated
 from apps.likes.models.dislike import ProductDislike
 from apps.likes.serializers.dislike import ProductDislikeSerializer
 
+class ProductDislikeListView(generics.ListAPIView):
+    serializer_class = ProductDislikeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return ProductDislike.objects.filter(user=user)
+
+
 class ProductDislikeToggleView(generics.CreateAPIView):
     queryset = ProductDislike.objects.all()
     serializer_class = ProductDislikeSerializer

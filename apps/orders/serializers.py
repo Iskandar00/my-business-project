@@ -1,8 +1,9 @@
+from django.db import transaction
 from rest_framework import serializers
+from django.shortcuts import get_object_or_404
 
 from apps.links.models import Link
 from apps.orders.models import Order
-from rest_framework.exceptions import ValidationError
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -10,28 +11,13 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = ('product_count', 'buyer_name', 'phone_number', 'area',)
 
-    def validate(self, data):
-        order = Order(**data)
-        try:
-            order.clean()
-        except ValidationError as e:
-            raise serializers.ValidationError(e.message_dict)
-        return data
-
+    @transaction.atomic
     def create(self, validated_data):
-        product_id = self.context.get("product_id")
-        if product_id is None:
-            raise serializers.ValidationError("Product ID is required in the context.")
+        link_id = self.context['request'].query_params.get('link')
+        link = get_object_or_404(Link, id_generate=link_id)
 
-        link = Link.objects.filter(product__id_generate=product_id, user=validated_data.user)
-        if not link.exists():
-            raise serializers.ValidationError("No such link exists.")
+        link.user.total_balance += link.product.admin_money * validated_data['product_count']
+        link.user.save()
 
-        link_instance = link.first()
-        link_instance.user.total_balance += link_instance.product.admin_money * validated_data['product_count']
-        link_instance.user.save()
-
-        order = Order.objects.create(**validated_data)
-        order.clean()
-        order.save()
-        return order
+        Order.objects.create(**validated_data, link=link)
+        return validated_data

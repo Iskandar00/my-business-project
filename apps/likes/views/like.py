@@ -5,6 +5,15 @@ from apps.likes.models.like import ProductLike
 from apps.likes.serializers.like import ProductLikeSerializer
 
 
+class ProductLikeListView(generics.ListAPIView):
+    serializer_class = ProductLikeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return ProductLike.objects.filter(user=user)
+
+
 class ProductLikeToggleView(generics.CreateAPIView):
     queryset = ProductLike.objects.all()
     serializer_class = ProductLikeSerializer
@@ -14,15 +23,12 @@ class ProductLikeToggleView(generics.CreateAPIView):
         user = request.user
         product_id = request.data.get('product')
 
-        # Check if like already exists
         like = ProductLike.objects.filter(user=user, product_id=product_id).first()
 
         if like:
-            # If it exists, delete it (toggle off)
             like.delete()
             return Response({"message": "Product like removed."}, status=status.HTTP_204_NO_CONTENT)
         else:
-            # If it doesn't exist, create a new like (toggle on)
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save(user=user)

@@ -22,13 +22,13 @@ class ProductDislike(models.Model):
         },
     )
 
-    def clean(self):
-        # Remove the like if a dislike is added by the same user
+    def save(self, *args, **kwargs):
         if self.user and self.product:
             like_obj = self.product.likes.filter(user=self.user).last()
             if like_obj:
                 like_obj.delete()
-        super().clean()
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.pk}"

@@ -1,9 +1,12 @@
 from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+
 from apps.links.models import Link
 from apps.links.serializers import LinkSerializer
 
 
 class LinkCreateView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Link.objects.all()
     serializer_class = LinkSerializer
 

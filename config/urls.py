@@ -21,7 +21,7 @@ urlpatterns += [
 
 urlpatterns += [
     path('like/', include('apps.likes.urls')),
-    path('product/', include('apps.orders.urls')),
+    path('orders/', include('apps.orders.urls')),
     path('links/', include('apps.links.urls')),
 ]
 
