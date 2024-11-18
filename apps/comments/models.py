@@ -10,7 +10,7 @@ class Comment(models.Model):
         null=True,
         limit_choices_to={
             'is_active': True,
-            'is_delete': False,
+            'is_deleted': False,
         },
         related_name='comments'
     )

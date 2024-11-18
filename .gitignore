@@ -86,8 +86,16 @@ target/
 __pycache__/
 local_settings.py
 
-*/migrations/0*
+apps/*/migrations/0*
 media
+static
 
 .env
 db.sqlite3
+
+Pipfile
+Pipfile.lock
+venv
+
+.vscode
+.idea

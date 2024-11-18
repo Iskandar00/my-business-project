@@ -23,6 +23,7 @@ urlpatterns += [
     path('like/', include('apps.likes.urls')),
     path('orders/', include('apps.orders.urls')),
     path('links/', include('apps.links.urls')),
+    path('comments/', include('apps.comments.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
