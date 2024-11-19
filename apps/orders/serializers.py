@@ -9,7 +9,7 @@ from apps.orders.models import Order
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ('product_count', 'buyer_name', 'phone_number', 'area',)
+        fields = ('product_count', 'buyer_name', 'phone_number', 'area', 'product')
 
     @transaction.atomic
     def create(self, validated_data):

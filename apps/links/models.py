@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.db import models
 
+from rest_framework import serializers
+
 from apps.general.models import General
 from apps.general.unique_id import generate_unique_id
 
@@ -31,7 +33,10 @@ class Link(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def url_generate(self):
-        sayt_url = General.objects.get().sayt_url
+        general = General.objects.first()
+        if not general:
+            raise serializers.ValidationError("URL generation failed.")
+        sayt_url = general.sayt_url
         return f'{sayt_url}/orders/?link={self.id_generate}'
 
     def __str__(self):

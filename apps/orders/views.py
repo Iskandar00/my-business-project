@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, redirect
-from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -7,7 +7,9 @@ from apps.links.models import Link
 from apps.orders.serializers import OrderSerializer
 
 
-class CreateOrderView(APIView):
+class CreateOrderView(GenericAPIView):
+    serializer_class = OrderSerializer
+    queryset = []
 
     def get(self, request):
         link_id = request.query_params.get('link')
@@ -32,7 +34,7 @@ class CreateOrderView(APIView):
              })
 
     def post(self, request):
-        serializer = OrderSerializer(data=request.data, context={"request":request})
+        serializer = self.get_serializer(data=request.data, context={"request":request})
         serializer.is_valid(raise_exception=True)
-        order = serializer.save()
-        return Response(order, status=status.HTTP_201_CREATED)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
