@@ -9,6 +9,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+REDIS_PORT_URL = "redis://redis_db:6379"
+
 INSTALLED_APPS = [
     'jazzmin',
     
