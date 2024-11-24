@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = 'django-insecure-$4w(zunj95wi!k$uq3ta9+=a4u%n0$&6o)8etvl%=@ejmm0v%q'
@@ -40,6 +41,7 @@ INSTALLED_APPS += [
     'apps.products.apps.ProductsConfig',
     'apps.users.apps.UsersConfig',
     'apps.wishlists.apps.WishlistsConfig',
+    'apps.drivers.apps.DriversConfig',
 ]
 
 MIDDLEWARE = [
