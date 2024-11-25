@@ -3,7 +3,7 @@ from django.db import models
 
 
 class ProductImage(models.Model):
-    product = models.ForeignKey('products.Product', on_delete=models.CASCADE)
+    product = models.ForeignKey('products.Product', on_delete=models.CASCADE, related_name='product_images')
     image = models.ImageField(upload_to='discount/images/%Y/%m/%d/',
                               # validators=[discount_image_size]
                               )

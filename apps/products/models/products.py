@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
+from apps.features.models import FeatureValue
 from apps.general.unique_id import generate_unique_id
 
 
@@ -39,6 +40,38 @@ class Product(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def get_features(self):
+        features = {}
+        feature_values = FeatureValue.objects.filter(product_features__product_id=self.pk).select_related(
+            'feature').distinct()
+
+        for value in feature_values:
+            if value.feature_id not in features:
+                features[value.feature_id] = {
+                    'feature_id': value.feature.id,
+                    'feature_name': value.feature.name,
+                    'values': [
+                        {
+                            'value_name': value.value,
+                            'value_id': value.id,
+                        }
+                    ]
+                }
+            else:
+                features[value.feature_id]['values'].append(
+                    {
+                        'value_name': value.value,
+                        'value_id': value.id,
+                    }
+                )
+
+        sorted_features = list(features.values())
+        sorted_features.sort(key=lambda obj: len(obj['feature_name']), reverse=True)
+        return sorted_features
+
+    def get_images(self):
+        return self.product_images.all().order_by('ordering_number')
 
     class Meta:
         db_table = 'product'

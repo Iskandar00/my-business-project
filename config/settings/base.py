@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 
-
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = 'django-insecure-$4w(zunj95wi!k$uq3ta9+=a4u%n0$&6o)8etvl%=@ejmm0v%q'
@@ -14,7 +13,7 @@ REDIS_PORT_URL = "redis://redis_db:6379"
 
 INSTALLED_APPS = [
     'jazzmin',
-    
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,6 +41,7 @@ INSTALLED_APPS += [
     'apps.users.apps.UsersConfig',
     'apps.wishlists.apps.WishlistsConfig',
     'apps.drivers.apps.DriversConfig',
+    'apps.features.apps.FeaturesConfig',
 ]
 
 MIDDLEWARE = [
@@ -107,4 +107,3 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR / 'media')
 
 AUTH_USER_MODEL = 'users.CustomUser'
-

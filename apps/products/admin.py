@@ -1,6 +1,7 @@
 from django.contrib import admin
 from apps.products.models.products import Product
 from apps.products.models.product_image import ProductImage
+from apps.products.models import ProductFeature
 
 
 class ProductImageInline(admin.TabularInline):
@@ -21,7 +22,6 @@ class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductImageInline]
 
 
-
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ('product', 'image', 'ordering_number')
@@ -33,3 +33,18 @@ class ProductImageAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         return queryset.select_related('product')
+
+
+@admin.register(ProductFeature)
+class ProductFeatureAdmin(admin.ModelAdmin):
+    list_display = ('id', 'product', 'feature_value')
+    list_filter = ('product', 'feature_value')
+    search_fields = ('product__name', 'feature_value__value')
+    autocomplete_fields = ('product', 'feature_value')
+
+    def get_queryset(self, request):
+        """
+        Use `select_related` to fetch related fields in a single query.
+        """
+        queryset = super().get_queryset(request)
+        return queryset.select_related('product', 'feature_value')
