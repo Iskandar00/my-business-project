@@ -1,10 +1,13 @@
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
+
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 from rest_framework import status
 
 from apps.links.models import Link
 from apps.orders.serializers import OrderSerializer
+from apps.products.models.products import Product
 from apps.products.serializers import ProductSerializer
 
 
@@ -16,12 +19,12 @@ class CreateOrderView(GenericAPIView):
         link_id = request.query_params.get('link')
         product_id = request.query_params.get('product')
         if not link_id and not product_id:
-            return redirect('https://chatgpt.com/')
+            return Response({'error': 'link and product not found'}, status=404)
         if link_id:
             link = get_object_or_404(Link.objects.select_related('product'), id_generate=link_id)
             product = link.product
         if product_id:
-            pass
+            product = get_object_or_404(Product, id=product_id)
         return Response(
             {'id_generate': product.id_generate,
              'name': product.name,

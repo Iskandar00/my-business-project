@@ -13,11 +13,19 @@ class OrderSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
+        link = None
         link_id = self.context['request'].query_params.get('link')
-        link = get_object_or_404(Link, id_generate=link_id)
+        
+        if not link_id and not validated_data['product']:
+            raise serializers.ValidationError("Link and product not found")
+        
+        if link_id:
+            link = get_object_or_404(Link, id_generate=link_id)
+            
+            validated_data['product'] = link.product
 
-        link.user.estimated_balance += link.product.admin_money * validated_data['product_count']
-        link.user.save()
+            link.user.estimated_balance += link.product.admin_money * validated_data['product_count']
+            link.user.save()
 
         Order.objects.create(**validated_data, link=link)
         return validated_data
