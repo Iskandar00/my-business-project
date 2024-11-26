@@ -5,6 +5,7 @@ from rest_framework import status
 
 from apps.links.models import Link
 from apps.orders.serializers import OrderSerializer
+from apps.products.serializers import ProductSerializer
 
 
 class CreateOrderView(GenericAPIView):
@@ -17,7 +18,7 @@ class CreateOrderView(GenericAPIView):
         if not link_id and not product_id:
             return redirect('https://chatgpt.com/')
         if link_id:
-            link = get_object_or_404(Link, id_generate=link_id)
+            link = get_object_or_404(Link.objects.select_related('product'), id_generate=link_id)
             product = link.product
         if product_id:
             pass
@@ -31,6 +32,8 @@ class CreateOrderView(GenericAPIView):
              'like_counts': product.like_counts,
              'view_counts': product.view_counts,
              'comment_counts': product.comment_counts,
+             'features': product.get_features(),
+             'images': ProductSerializer(product).data['images'],
              })
 
     def post(self, request):
