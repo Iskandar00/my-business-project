@@ -1,15 +1,19 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY = 'django-insecure-$4w(zunj95wi!k$uq3ta9+=a4u%n0$&6o)8etvl%=@ejmm0v%q'
+SECRET_KEY = os.environ['SECRET_KEY']
 
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
-REDIS_PORT_URL = "redis://redis_db:6379"
+REDIS_PORT_URL = os.environ['REDIS_PORT_URL']
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -74,13 +78,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
@@ -96,9 +93,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'home-page'
-LOGOUT_REDIRECT_URL = 'login'
+LOGIN_URL = 'auth/login'
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR / 'static')

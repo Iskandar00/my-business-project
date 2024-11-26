@@ -1,21 +1,21 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.cache import cache
-from django.db.models import Q
 
 from rest_framework import serializers
 
 from apps.authentication.utils import generate_jwt_tokens
 from apps.users.sms_providers import EskizUz
+from apps.users.validators import phone_validate
 
 
 class SendCodeSerializer(serializers.Serializer):
-    username = serializers.CharField()
+    username = serializers.CharField(validators=[phone_validate])
 
     def validate_username(self, username):
 
         # checking username unique
-        user = get_user_model().objects.filter(Q(phone_number=username))
+        user = get_user_model().objects.filter(phone_number=username)
         if user.exists():
             raise serializers.ValidationError("User with this phone_number already exists.")
 
