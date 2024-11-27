@@ -38,9 +38,8 @@ class ProductImageAdmin(admin.ModelAdmin):
 @admin.register(ProductFeature)
 class ProductFeatureAdmin(admin.ModelAdmin):
     list_display = ('id', 'product', 'feature_value')
-    list_filter = ('product', 'feature_value')
+    list_filter = ('product',)
     search_fields = ('product__name', 'feature_value__value')
-    autocomplete_fields = ('product', 'feature_value')
 
     def get_queryset(self, request):
         """
