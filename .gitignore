@@ -86,11 +86,10 @@ target/
 __pycache__/
 local_settings.py
 
-apps/*/migrations/0*
-media
-static
+src/apps/*/migrations/0*
+src/media
+src/static
 
-.env
 db.sqlite3
 
 Pipfile

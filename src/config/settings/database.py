@@ -2,7 +2,7 @@ import os
 
 from django.conf import settings
 
-POSTGRES = False
+POSTGRES = True
 
 if POSTGRES:
     DATABASES = {

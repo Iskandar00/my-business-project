@@ -37,12 +37,13 @@ class Link(models.Model):
         if not general:
             raise serializers.ValidationError("URL generation failed.")
         sayt_url = general.sayt_url
-        return f'{sayt_url}/orders/?link={self.id_generate}'
+        return f'{sayt_url}api/v1/orders/?link={self.id_generate}'
 
     def __str__(self):
         return self.title
 
     class Meta:
+        unique_together = ('user', 'product')
         verbose_name = 'Link'
         verbose_name_plural = 'Links'
 

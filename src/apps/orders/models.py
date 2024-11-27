@@ -12,7 +12,7 @@ from rest_framework.exceptions import ValidationError
 
 
 class Order(models.Model):
-    link = models.ForeignKey('links.Link', on_delete=models.SET_NULL, null=True)
+    link = models.ForeignKey('links.Link', on_delete=models.SET_NULL, blank=True, null=True)
 
     class AreaChoices(models.IntegerChoices):
         TOSHKENT = 1, 'Toshkent'
