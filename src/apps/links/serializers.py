@@ -3,6 +3,7 @@ from apps.links.models import Link
 
 class LinkSerializer(serializers.ModelSerializer):
     url_generate = serializers.SerializerMethodField()
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Link
@@ -18,7 +19,3 @@ class LinkSerializer(serializers.ModelSerializer):
     #     if not user.is_authenticated or not user.role == 'admin':
     #         raise ValidationError("Only admin users can create links.")
     #     return data
-
-    def create(self, validated_data):
-        validated_data['user'] = self.context['request'].user
-        return super().create(validated_data)
