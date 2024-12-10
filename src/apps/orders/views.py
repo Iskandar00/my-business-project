@@ -36,7 +36,7 @@ class CreateOrderView(GenericAPIView):
              'view_counts': product.view_counts,
              'comment_counts': product.comment_counts,
              'features': product.get_features(),
-             'images': ProductSerializer(product).data['images'],
+             'images': ProductSerializer(product).data['product_images'],
              })
 
     def post(self, request):
