@@ -16,3 +16,12 @@ class LinkCreateView(generics.CreateAPIView):
             "id_generate": link.id_generate,
             "url_generate": link.url_generate(),
         }
+
+
+class ViewLinksAPIView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Link.objects.all()
+    serializer_class = LinkSerializer
+
+    def get_queryset(self):
+        return Link.objects.filter(user=self.request.user) 
