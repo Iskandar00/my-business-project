@@ -7,13 +7,15 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = os.environ.get('SECRET_KEY', "test")
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+CORS_ALLOW_ALL_ORIGINS = True
 
-REDIS_PORT_URL = os.environ['REDIS_PORT_URL']
+ALLOWED_HOSTS = ["*"]
+
+REDIS_PORT_URL = os.environ.get('REDIS_PORT_URL', 'redis://localhost:6379')
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -51,6 +53,9 @@ INSTALLED_APPS += [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    
+    'corsheaders.middleware.CorsMiddleware',
+    
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
