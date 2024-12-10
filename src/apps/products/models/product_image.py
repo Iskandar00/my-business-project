@@ -9,3 +9,5 @@ class ProductImage(models.Model):
                               )
     ordering_number = models.PositiveSmallIntegerField()
 
+    class Meta:
+        ordering = ['ordering_number']
