@@ -11,8 +11,8 @@ class ProductListView(APIView):
     """
 
     def get(self, request):
-        products = Product.objects.all()
-        serializer = ProductSerializer(products, many=True)
+        products = Product.objects.all().prefetch_related("product_images")
+        serializer = ProductSerializer(products, many=True, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
