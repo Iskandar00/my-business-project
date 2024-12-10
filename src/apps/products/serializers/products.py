@@ -6,16 +6,14 @@ from apps.products.models.product_image import ProductImage  # Assuming the Prod
 from apps.products.models.products import Product
 
 
-
 class ProductImageSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductImage
-        fields = ['id', 'image']
+        fields = ['id', 'image', 'ordering_number']
 
     def get_image(self, obj):
-        print('asdasd')
         request = self.context.get('request')
         if request:
             return request.build_absolute_uri(obj.image.url)

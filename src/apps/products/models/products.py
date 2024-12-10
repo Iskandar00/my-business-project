@@ -47,7 +47,7 @@ class Product(models.Model):
             'feature').distinct()
 
         for value in feature_values:
-            if value.feature_id not in features:
+            if value.feature_id not in features: 
                 features[value.feature_id] = {
                     'feature_id': value.feature.id,
                     'feature_name': value.feature.name,
@@ -55,6 +55,7 @@ class Product(models.Model):
                         {
                             'value_name': value.value,
                             'value_id': value.id,
+                            'price': value.product_features.filter(feature_value_id=value.id).first().price,
                         }
                     ]
                 }
@@ -63,6 +64,8 @@ class Product(models.Model):
                     {
                         'value_name': value.value,
                         'value_id': value.id,
+                        'price': value.product_features.filter(feature_value_id=value.id).first().price,
+                        
                     }
                 )
 
