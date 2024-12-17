@@ -6,6 +6,7 @@ from apps.categories.models.sub_category import SubCategory
 class SubCategoryInline(admin.TabularInline):
     model = SubCategory
     extra = 5
+    prepopulated_fields = {'slug': ('name',)}
 
 
 @admin.register(Category)
