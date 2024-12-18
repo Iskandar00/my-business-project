@@ -24,4 +24,4 @@ class ViewLinksAPIView(generics.ListAPIView):
     serializer_class = LinkSerializer
 
     def get_queryset(self):
-        return Link.objects.filter(user=self.request.user) 
+        return Link.objects.filter(user=self.request.user)

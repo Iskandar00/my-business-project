@@ -3,7 +3,7 @@ from django.db import models
 
 from rest_framework import serializers
 
-from apps.general.models import
+
 from apps.general.unique_id import generate_unique_id
 
 
