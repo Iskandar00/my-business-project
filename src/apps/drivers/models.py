@@ -3,15 +3,16 @@ from django.db import models
 from apps.users.models import CustomUser
 from apps.orders.models import Order
 
-class ProductDelivery(models.Model):
 
+class ProductDelivery(models.Model):
     class Status(models.IntegerChoices):
         YETKAZILMOQDA = 1, 'YETKAZILMOQDA'
         YETKAZIB_BERILDI = 2, 'YETKAZIB_BERILDI'
         QAYTIB_KELDI = 3, 'QAYTIB_KELDI'
 
-
-    delivery = models.ForeignKey('users.CustomUser', on_delete=models.SET_NULL, null=True, limit_choices_to={'role': CustomUser.RoleChoices.Supplier}, related_name='deliveries')
+    delivery = models.ForeignKey('users.CustomUser', on_delete=models.SET_NULL, null=True,
+                                 limit_choices_to={'role': CustomUser.RoleChoices.Deliverer},
+                                 related_name='deliveries')
     order = models.ForeignKey('orders.Order', on_delete=models.SET_NULL, null=True)
 
     status = models.IntegerField(choices=Status.choices, default=Status.YETKAZILMOQDA)
@@ -36,6 +37,3 @@ class ProductDelivery(models.Model):
 
     def __str__(self):
         return self.delivery
-
-
-

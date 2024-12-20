@@ -16,7 +16,7 @@ class CustomUser(AbstractUser):
         Director = 'director'
         Admin = 'admin'
         Deliverer = 'deliverer'
-        Supplier = 'supplier'
+        Operator = 'operator'
 
     role = models.CharField(max_length=10, choices=RoleChoices.choices)
 

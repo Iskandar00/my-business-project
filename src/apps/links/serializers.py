@@ -1,5 +1,9 @@
 from rest_framework import serializers
 from apps.links.models import Link
+from rest_framework.exceptions import ValidationError
+
+from apps.users.models import CustomUser
+
 
 class LinkSerializer(serializers.ModelSerializer):
     url_generate = serializers.SerializerMethodField()
@@ -13,9 +17,8 @@ class LinkSerializer(serializers.ModelSerializer):
     def get_url_generate(self, obj):
         return obj.url_generate()
 
-    # def validate(self, data):
-    #     # Check if the user has the 'admin' role
-    #     user = self.context['request'].user
-    #     if not user.is_authenticated or not user.role == 'admin':
-    #         raise ValidationError("Only admin users can create links.")
-    #     return data
+    def validate(self, data):
+        user = self.context['request'].user
+        if user.role != CustomUser.RoleChoices.Admin.value:
+            raise ValidationError("Only admin users can create links.")
+        return data

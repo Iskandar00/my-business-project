@@ -7,7 +7,7 @@ class BonusMoney(models.Model):
         CustomUser,
         on_delete=models.SET_NULL,
         null=True,
-        limit_choices_to={'role__in': [CustomUser.RoleChoices.Admin, CustomUser.RoleChoices.Supplier]}
+        limit_choices_to={'role__in': [CustomUser.RoleChoices.Admin, CustomUser.RoleChoices.Deliverer]}
     )
     bonus_money = models.IntegerField(default=0)
     card_number = models.CharField(max_length=16)

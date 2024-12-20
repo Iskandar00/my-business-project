@@ -29,3 +29,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
         Order.objects.create(**validated_data, link=link)
         return validated_data
+
+class OrderListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ('id', 'product_count', 'buyer_name', 'phone_number', 'area', 'status', 'product', 'order_date')
