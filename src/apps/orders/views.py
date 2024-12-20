@@ -1,20 +1,17 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.exceptions import ValidationError
 
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework import status
 
 from apps.links.models import Link
-from apps.orders.serializers import OrderSerializer
 from apps.products.models.products import Product
 from apps.products.serializers import ProductSerializer
-
-from apps.orders.serializers import OrderListSerializer
-
 from apps.orders.models import Order
-from rest_framework.views import APIView
+from apps.orders.serializers import OrderListSerializer, OrderSerializer
+from apps.orders.permissions import IsOperatorPermission
 
 
 class CreateOrderView(GenericAPIView):
@@ -51,10 +48,13 @@ class CreateOrderView(GenericAPIView):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+
 class OrderListView(GenericAPIView):
+    permission_classes = [IsAuthenticated, IsOperatorPermission]
+    
     def get(self, request):
         operator_orders = request.user.operator_orders.all()
-        all_orders = Order.objects.all()
+        all_orders = Order.objects.filter(operator__isnull=True)
 
         operator_serializer = OrderListSerializer(operator_orders, many=True)
         all_orders_serializer = OrderListSerializer(all_orders, many=True)
@@ -65,17 +65,14 @@ class OrderListView(GenericAPIView):
         })
 
 
+class AssignOperatorView(GenericAPIView):
+    permission_classes = [IsAuthenticated, IsOperatorPermission]
+    serializer_class = None
+    queryset = []
 
-
-class AssignOperatorView(APIView):
-    permission_classes = [IsAuthenticated]
-    def post(self, request, order_id):
+    def get(self, request, order_id):
+        user = request.user
         order = get_object_or_404(Order, id=order_id)
-
-        try:
-            user = request.user.id
-            order.assign_operator(user_id=user)
-            return Response({"detail": f"Siz {order_id} buyurtma uchun operator tayinladingiz {user}"},
-                            status=status.HTTP_200_OK)
-        except ValidationError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        order.assign_operator(user_id=user.id)
+        return Response({"detail": f"Siz {order_id} buyurtma uchun operator tayinladingiz {user.fullname}"},
+                        status=status.HTTP_200_OK)
