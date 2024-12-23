@@ -1,16 +1,7 @@
 from django.core.validators import RegexValidator, MinValueValidator
-from django.db import models
-
-from rest_framework.exceptions import ValidationError
-
-"""
-{
-    "buyer_name": "kimdir",
-    "phone_number": "+998907654321",
-    "area": 1,
-    "product_count": 4
-}
-"""
+from django.db import models, transaction
+from django.core.exceptions import ValidationError
+from apps.users.models import CustomUser
 
 
 class Order(models.Model):
@@ -40,9 +31,26 @@ class Order(models.Model):
         QAYTIB_KELDI = 6, 'QAYTIB_KELDI'
 
     status = models.IntegerField(choices=StatusChoices.choices, default=StatusChoices.YANGI)
-    admin = models.ForeignKey('users.CustomUser', on_delete=models.SET_NULL, blank=True, null=True, related_name='admin_orders')
-    product = models.ForeignKey('products.Product', on_delete=models.SET_NULL, blank=True, null=True, related_name='product_orders')
-    operator = models.ForeignKey('users.CustomUser', on_delete=models.SET_NULL, blank=True, null=True, related_name='operator_orders')
+    admin = models.ForeignKey(
+        'users.CustomUser',
+        on_delete=models.SET_NULL,
+        blank=True, null=True,
+        related_name='admin_orders',
+        limit_choices_to={'role': CustomUser.RoleChoices.Admin.value}
+    )
+    product = models.ForeignKey(
+        'products.Product',
+        on_delete=models.SET_NULL,
+        blank=True, null=True,
+        related_name='product_orders'
+    )
+    operator = models.ForeignKey(
+        'users.CustomUser',
+        on_delete=models.SET_NULL,
+        blank=True, null=True,
+        related_name='operator_orders',
+        limit_choices_to={'role': CustomUser.RoleChoices.Operator.value}
+    )
 
     total_balance = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     estimated_balance = models.DecimalField(max_digits=20, decimal_places=2, default=0)
@@ -62,44 +70,55 @@ class Order(models.Model):
     area = models.IntegerField(choices=AreaChoices.choices)
     order_date = models.DateTimeField(auto_now_add=True)
 
-    def save(self, *args, **kwargs):
+    def clean(self):
         if not self.link and not self.product:
-            raise ValidationError("product does not exists")
+            raise ValidationError({"product": "Either 'link' or 'product' must be provided."})
 
-        if self.link:
-            self.admin = self.link.user
-            self.product = self.link.product
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        with transaction.atomic():
+            if self.link:
+                self._update_admin_balance()
+                if self.operator:
+                    self._update_operator_balance()
 
-            if not self.id:
-                self.estimated_balance = self.product.admin_money * self.product_count
+            super().save(*args, **kwargs)
 
-                self.admin.estimated_balance =+ self.product.admin_money * self.product_count
+    def _update_admin_balance(self):
+        self.admin = self.link.user
+        self.product = self.link.product
 
-            if self.status == self.StatusChoices.YETKAZIB_BERILDI:
-                self.estimated_balance -= self.product.admin_money * self.product_count
-                self.total_balance =+ self.product.admin_money * self.product_count
+        if not self.id:  # Only for new orders
+            self.estimated_balance = self.product.admin_money * self.product_count
+            self.admin.estimated_balance += self.estimated_balance
 
-                self.admin.estimated_balance -= self.product.admin_money * self.product_count
-                self.admin.total_balance =+ self.product.admin_money * self.product_count
-                self.admin.save()
+        if self.status == self.StatusChoices.YETKAZIB_BERILDI:
+            self.total_balance += self.product.admin_money * self.product_count
+            self.admin.total_balance += self.product.admin_money * self.product_count
+            self.admin.estimated_balance -= self.product.admin_money * self.product_count
 
-            if self.status == self.StatusChoices.QAYTIB_KELDI:
-                self.estimated_balance -= self.product.admin_money * self.product_count
+        elif self.status == self.StatusChoices.QAYTIB_KELDI:
+            self.admin.estimated_balance -= self.product.admin_money * self.product_count
 
-                self.admin.estimated_balance -= self.product.admin_money * self.product_count
-                self.admin.save()
+        self.admin.save()
 
-        super().save(*args, **kwargs)
+    def _update_operator_balance(self):
+        if not self.operator:
+            return
 
-    def update(self):
-        pass
+        if self.status == self.StatusChoices.YETKAZIB_BERILDI:
+            self.operator.total_balance += 2000
+
+        self.operator.save()
 
     def assign_operator(self, user_id):
-        if self.operator is not None:
-            raise ValidationError("Operator allaqachon tayinlangan.")
-
-        self.operator_id = user_id
+        user = CustomUser.objects.filter(id=user_id, role=CustomUser.RoleChoices.Operator).first()
+        if not user:
+            raise ValidationError("The selected user is not a valid operator.")
+        if self.operator:
+            raise ValidationError("Operator has already been assigned.")
+        self.operator = user
         self.save()
 
     def __str__(self):
-        return f"Order {self.id} for {self.buyer_name} from {self.area}"
+        return f"Order {self.id} for {self.buyer_name} from {self.get_area_display()}"
