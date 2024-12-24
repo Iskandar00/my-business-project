@@ -7,14 +7,17 @@ from rest_framework.permissions import IsAuthenticated
 
 
 class AdminPaymentView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        payments = AdminPayment.objects.all()
+        payments = AdminPayment.objects.filter(user=request.user)
         serializer = AdminPaymentSerializer(payments, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = AdminPaymentSerializer(data=request.data)
+        data = request.data.copy()
+        data['user'] = request.user.id
+        serializer = AdminPaymentSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
