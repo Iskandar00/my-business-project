@@ -21,5 +21,8 @@ class General(models.Model):
     facebook_url = models.URLField(max_length=100)
     youtube_url = models.URLField(max_length=100)
 
+    operator_fee = models.PositiveIntegerField()
+    minimum_withdrawal_amount = models.PositiveIntegerField()
+
     def __str__(self):
         return self.title

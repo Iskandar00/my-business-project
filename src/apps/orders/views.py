@@ -1,9 +1,9 @@
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework import status
 
 from apps.links.models import Link
@@ -12,6 +12,7 @@ from apps.products.serializers import ProductSerializer
 from apps.orders.models import Order
 from apps.orders.serializers import OrderListSerializer, OrderSerializer
 from apps.orders.permissions import IsOperatorPermission
+from rest_framework.views import APIView
 
 
 class CreateOrderView(GenericAPIView):
@@ -54,14 +55,17 @@ class OrderListView(GenericAPIView):
     
     def get(self, request):
         operator_orders = request.user.operator_orders.all()
-        all_orders = Order.objects.filter(operator__isnull=True)
+        all_orders_with_operator = Order.objects.filter(operator__isnull=True)
+        all_orders = Order.objects.all()
 
         operator_serializer = OrderListSerializer(operator_orders, many=True)
-        all_orders_serializer = OrderListSerializer(all_orders, many=True)
+        all_orders_serializer = OrderListSerializer(all_orders_with_operator, many=True)
+        all_orders = OrderListSerializer(all_orders, many=True)
 
         return Response({
             "operator_orders": operator_serializer.data,
-            "all_orders": all_orders_serializer.data,
+            "all_orders_with_operator": all_orders_serializer.data,
+            "all_orders": all_orders.data
         })
 
 
@@ -76,3 +80,33 @@ class AssignOperatorView(GenericAPIView):
         order.assign_operator(user_id=user.id)
         return Response({"detail": f"Siz {order_id} buyurtma uchun operator tayinladingiz {user.fullname}"},
                         status=status.HTTP_200_OK)
+
+class DashboardStatistic(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        if user.role == user.RoleChoices.Admin:
+            user_orders = Order.objects.filter(admin=user)
+        elif user.role == user.RoleChoices.Operator:
+            user_orders = Order.objects.filter(operator=user)
+        elif user.role == user.RoleChoices.Director:
+            user_orders = Order.objects.all()
+        else:
+            return Response({"detail": "You do not have permission to view order statistics."}, status=403)
+
+        stats = {
+            "total_orders": user_orders.aggregate(total=Sum('product_count'))["total"] or 0,
+            "status_statistics": {
+                status[1]: user_orders.filter(status=status[0]).aggregate(total=Sum('product_count'))["total"] or 0
+                for status in Order.StatusChoices.choices
+            }
+        }
+
+        serialized_orders = OrderListSerializer(user_orders, many=True)
+
+        return Response({
+            "statistics": stats,
+            "all_orders": serialized_orders.data
+        })

@@ -38,6 +38,9 @@ class CustomUser(AbstractUser):
     total_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     estimated_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
+    bonus_money = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+
     number_of_products_sold = models.PositiveSmallIntegerField(default=0)
     number_of_products_delivered = models.PositiveSmallIntegerField(default=0)
 

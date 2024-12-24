@@ -31,7 +31,9 @@ class Product(models.Model):
 
     in_stock = models.PositiveSmallIntegerField(default=0)
     admin_money = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    admin_bonus_money = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     delivery_price = models.PositiveIntegerField(default=30000)
+    delivery_bonus_money = models.PositiveIntegerField(default=0)
 
     is_active = models.BooleanField(default=True)
     like_counts = models.IntegerField(default=0)
