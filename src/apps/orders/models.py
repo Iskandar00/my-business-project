@@ -3,6 +3,8 @@ from django.db import models, transaction
 from django.core.exceptions import ValidationError
 from apps.users.models import CustomUser
 
+from apps.general.models import General
+
 
 class Order(models.Model):
     link = models.ForeignKey('links.Link', on_delete=models.SET_NULL, blank=True, null=True)
@@ -107,7 +109,7 @@ class Order(models.Model):
             return
 
         if self.status == self.StatusChoices.YETKAZIB_BERILDI:
-            self.operator.total_balance += 2000
+            self.operator.total_balance += General.operator_fee
 
         self.operator.save()
 
