@@ -90,7 +90,7 @@ class Order(models.Model):
         self.admin = self.link.user
         self.product = self.link.product
 
-        if not self.id:  # Only for new orders
+        if not self.id:
             self.estimated_balance = self.product.admin_money * self.product_count
             self.admin.estimated_balance += self.estimated_balance
 
@@ -98,6 +98,7 @@ class Order(models.Model):
             self.total_balance += self.product.admin_money * self.product_count
             self.admin.total_balance += self.product.admin_money * self.product_count
             self.admin.estimated_balance -= self.product.admin_money * self.product_count
+            self.admin.bonus_money += self.product.admin_bonus_money * self.product_count
 
         elif self.status == self.StatusChoices.QAYTIB_KELDI:
             self.admin.estimated_balance -= self.product.admin_money * self.product_count

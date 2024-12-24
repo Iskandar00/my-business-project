@@ -1,9 +1,9 @@
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework import status
 
 from apps.links.models import Link
@@ -12,6 +12,7 @@ from apps.products.serializers import ProductSerializer
 from apps.orders.models import Order
 from apps.orders.serializers import OrderListSerializer, OrderSerializer
 from apps.orders.permissions import IsOperatorPermission
+from rest_framework.views import APIView
 
 
 class CreateOrderView(GenericAPIView):
@@ -79,3 +80,22 @@ class AssignOperatorView(GenericAPIView):
         order.assign_operator(user_id=user.id)
         return Response({"detail": f"Siz {order_id} buyurtma uchun operator tayinladingiz {user.fullname}"},
                         status=status.HTTP_200_OK)
+
+class DashboardStatistic(APIView):
+
+    def get(self, request):
+        stats = {
+            "total_orders": Order.objects.aggregate(total=Sum('product_count'))["total"] or 0,
+            "status_statistics": {
+                status[1]: Order.objects.filter(status=status[0]).aggregate(total=Sum('product_count'))["total"] or 0
+                for status in Order.StatusChoices.choices
+            }
+        }
+
+        all_orders = Order.objects.all()
+        serialized_orders = OrderListSerializer(all_orders, many=True)
+
+        return Response({
+            "statistics": stats,
+            "all_orders": serialized_orders.data
+        })
