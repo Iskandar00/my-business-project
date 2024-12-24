@@ -82,18 +82,29 @@ class AssignOperatorView(GenericAPIView):
                         status=status.HTTP_200_OK)
 
 class DashboardStatistic(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        user = request.user
+
+        if user.role == user.RoleChoices.Admin:
+            user_orders = Order.objects.filter(admin=user)
+        elif user.role == user.RoleChoices.Operator:
+            user_orders = Order.objects.filter(operator=user)
+        elif user.role == user.RoleChoices.Director:
+            user_orders = Order.objects.all()
+        else:
+            return Response({"detail": "You do not have permission to view order statistics."}, status=403)
+
         stats = {
-            "total_orders": Order.objects.aggregate(total=Sum('product_count'))["total"] or 0,
+            "total_orders": user_orders.aggregate(total=Sum('product_count'))["total"] or 0,
             "status_statistics": {
-                status[1]: Order.objects.filter(status=status[0]).aggregate(total=Sum('product_count'))["total"] or 0
+                status[1]: user_orders.filter(status=status[0]).aggregate(total=Sum('product_count'))["total"] or 0
                 for status in Order.StatusChoices.choices
             }
         }
 
-        all_orders = Order.objects.all()
-        serialized_orders = OrderListSerializer(all_orders, many=True)
+        serialized_orders = OrderListSerializer(user_orders, many=True)
 
         return Response({
             "statistics": stats,
