@@ -21,7 +21,7 @@ class Feature(models.Model):
 
     def save(self, *args, **kwargs):
         if self.sub_category:
-            self.main_category = self.sub_category.main_category
+            self.main_category = self.sub_category.category
         super().save(*args, **kwargs)
 
 
