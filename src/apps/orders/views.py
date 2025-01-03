@@ -50,24 +50,31 @@ class CreateOrderView(GenericAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class OrderListView(GenericAPIView):
+class OperatorOrdersView(GenericAPIView):
     permission_classes = [IsAuthenticated, IsOperatorPermission]
-    
+
     def get(self, request):
         operator_orders = request.user.operator_orders.all()
+        serializer = OrderListSerializer(operator_orders, many=True)
+        return Response({"operator_orders": serializer.data})
+
+
+class AllOrdersWithOperatorView(GenericAPIView):
+    permission_classes = [IsAuthenticated, IsOperatorPermission]
+
+    def get(self, request):
         all_orders_with_operator = Order.objects.filter(operator__isnull=True)
+        serializer = OrderListSerializer(all_orders_with_operator, many=True)
+        return Response({"all_orders_with_operator": serializer.data})
+
+
+class AllOrdersView(GenericAPIView):
+    permission_classes = [IsAuthenticated, IsOperatorPermission]
+
+    def get(self, request):
         all_orders = Order.objects.all()
-
-        operator_serializer = OrderListSerializer(operator_orders, many=True)
-        all_orders_serializer = OrderListSerializer(all_orders_with_operator, many=True)
-        all_orders = OrderListSerializer(all_orders, many=True)
-
-        return Response({
-            "operator_orders": operator_serializer.data,
-            "all_orders_with_operator": all_orders_serializer.data,
-            "all_orders": all_orders.data
-        })
-
+        serializer = OrderListSerializer(all_orders, many=True)
+        return Response({"all_orders": serializer.data})
 
 class AssignOperatorView(GenericAPIView):
     permission_classes = [IsAuthenticated, IsOperatorPermission]
