@@ -110,7 +110,8 @@ class Order(models.Model):
             return
 
         if self.status == self.StatusChoices.YETKAZIB_BERILDI:
-            self.operator.total_balance += General.operator_fee
+            operator_fee = General.objects.last().operator_fee
+            self.operator.total_balance += operator_fee
 
         self.operator.save()
 
