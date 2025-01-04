@@ -1,10 +1,12 @@
 from rest_framework import serializers
-from apps.likes.models.like import ProductLike
+
+from apps.likes.models import ProductLike
+
 
 class ProductLikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductLike
-        fields = ['id', 'user', 'product']
+        fields = ['user', 'product']
         read_only_fields = ['user']
 
     def create(self, validated_data):
@@ -12,3 +14,5 @@ class ProductLikeSerializer(serializers.ModelSerializer):
         if request and request.user:
             validated_data['user'] = request.user
         return super().create(validated_data)
+
+

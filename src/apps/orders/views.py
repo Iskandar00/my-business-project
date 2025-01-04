@@ -13,35 +13,54 @@ from apps.orders.models import Order
 from apps.orders.serializers import OrderListSerializer, OrderSerializer
 from apps.orders.permissions import IsOperatorPermission
 from rest_framework.views import APIView
+from apps.likes.models import ProductLike, ProductDislike
 
 
 class CreateOrderView(GenericAPIView):
     serializer_class = OrderSerializer
-    queryset = []
 
     def get(self, request):
         link_id = request.query_params.get('link')
         product_id = request.query_params.get('product')
+
         if not link_id and not product_id:
-            return Response({'error': 'link and product not found'}, status=404)
+            return Response({'error': 'Both link and product parameters are missing.'}, status=400)
+
+        product = None
+        product_like_count = 0
+        product_dislike_count = 0
+
         if link_id:
             link = get_object_or_404(Link.objects.select_related('product'), id_generate=link_id)
             product = link.product
+            product_like_count = ProductLike.objects.filter(product_id=product.id).count()
+            product_dislike_count = ProductDislike.objects.filter(product_id=product.id).count()
+
         if product_id:
             product = get_object_or_404(Product, id=product_id)
-        return Response(
-            {'id_generate': product.id_generate,
-             'name': product.name,
-             'price': product.price,
-             'description': product.description,
-             'video_url': product.video_url,
-             'delivery_price': product.delivery_price,
-             'like_counts': product.like_counts,
-             'view_counts': product.view_counts,
-             'comment_counts': product.comment_counts,
-             'features': product.get_features(),
-             'images': ProductSerializer(product).data['product_images'],
-             })
+            product_like_count = ProductLike.objects.filter(product_id=product.id).count()
+            product_dislike_count = ProductDislike.objects.filter(product_id=product.id).count()
+
+        if not product:
+            return Response({'error': 'Product not found.'}, status=404)
+
+        product_data = {
+            'id_generate': product.id_generate,
+            'name': product.name,
+            'price': product.price,
+            'description': product.description,
+            'video_url': product.video_url,
+            'delivery_price': product.delivery_price,
+            'like_counts': product.like_counts,
+            'view_counts': product.view_counts,
+            'comment_counts': product.comment_counts,
+            'features': product.get_features(),
+            'images': ProductSerializer(product).data.get('product_images', []),
+            'product_like_count': product_like_count,
+            'product_dislike_count': product_dislike_count,
+        }
+
+        return Response(product_data, status=200)
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data, context={"request":request})

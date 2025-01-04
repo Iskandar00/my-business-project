@@ -5,14 +5,6 @@ from apps.likes.models.like import ProductLike
 from apps.likes.serializers.like import ProductLikeSerializer
 
 
-class ProductLikeListView(generics.ListAPIView):
-    serializer_class = ProductLikeSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        return ProductLike.objects.filter(user=user)
-
 
 class ProductLikeToggleView(generics.CreateAPIView):
     queryset = ProductLike.objects.all()
