@@ -26,9 +26,6 @@ class CreateOrderView(GenericAPIView):
         if not link_id and not product_id:
             return Response({'error': 'Both link and product parameters are missing.'}, status=400)
 
-        product = None
-        product_like_count = 0
-        product_dislike_count = 0
 
         if link_id:
             link = get_object_or_404(Link.objects.select_related('product'), id_generate=link_id)
