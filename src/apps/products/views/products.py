@@ -1,22 +1,21 @@
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from apps.products.models.products import Product
 from apps.products.serializers.products import ProductSerializer
 
 
-class ProductListView(APIView):
+class ProductListAPIView(ListAPIView):
     """
     View to list all products.
     """
 
-    def get(self, request):
-        products = Product.objects.all().prefetch_related("product_images")
-        serializer = ProductSerializer(products, many=True, context={"request": request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    serializer_class = ProductSerializer
+    queryset = Product.objects.all().prefetch_related("product_images")
 
 
-class ProductDetailView(APIView):
+class ProductDetailAPIView(APIView):
     """
     View to retrieve a single product by ID.
     """

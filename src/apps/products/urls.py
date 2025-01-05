@@ -1,6 +1,8 @@
 from django.urls import path
-from apps.payments.views import AdminPaymentView
+
+from apps.products.views import ProductListAPIView
+
 
 urlpatterns = [
-    path('', AdminPaymentView.as_view(), name='payment-list-create'),
+    path('', ProductListAPIView.as_view(), name='payment-list-create'),
 ]
