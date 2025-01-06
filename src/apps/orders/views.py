@@ -30,13 +30,13 @@ class CreateOrderView(GenericAPIView):
         if link_id:
             link = get_object_or_404(Link.objects.select_related('product'), id_generate=link_id)
             product = link.product
-            product_like_count = ProductLike.objects.filter(product_id=product.id).count()
-            product_dislike_count = ProductDislike.objects.filter(product_id=product.id).count()
+            product_like_count = ProductLike.objects.filter(product_id=product.id).select_related('user', 'product').count()
+            product_dislike_count = ProductDislike.objects.filter(product_id=product.id).select_related('user', 'product').count()
 
         if product_id:
             product = get_object_or_404(Product, id=product_id)
-            product_like_count = ProductLike.objects.filter(product_id=product.id).count()
-            product_dislike_count = ProductDislike.objects.filter(product_id=product.id).count()
+            product_like_count = ProductLike.objects.filter(product_id=product.id).select_related('user', 'product').count()
+            product_dislike_count = ProductDislike.objects.filter(product_id=product.id).select_related('user', 'product').count()
 
         if not product:
             return Response({'error': 'Product not found.'}, status=404)
