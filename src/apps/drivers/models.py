@@ -1,5 +1,4 @@
 from django.db import models
-
 from apps.users.models import CustomUser
 from apps.orders.models import Order
 
@@ -23,17 +22,18 @@ class ProductDelivery(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        self.product = self.order.product
-        self.product_count = self.order.product_count
+        if self.order:
+            self.product = self.order.product
+            self.product_count = self.order.product_count
 
         super().save(*args, **kwargs)
-
-        if self.status == self.Status.YETKAZIB_BERILDI:
+        if self.status == self.Status.YETKAZILMOQDA:
+            self.order.status = Order.StatusChoices.YETKAZILMOQDA
+        elif self.status == self.Status.YETKAZIB_BERILDI:
             self.order.status = Order.StatusChoices.YETKAZIB_BERILDI
-            self.order.save()
         elif self.status == self.Status.QAYTIB_KELDI:
             self.order.status = Order.StatusChoices.QAYTIB_KELDI
-            self.order.save()
+        self.order.save()
 
     def __str__(self):
-        return self.delivery
+        return f"Delivery by {self.delivery}"

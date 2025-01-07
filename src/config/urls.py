@@ -24,6 +24,7 @@ urlpatterns += [
     path('api/v1/wishlist/', include('apps.wishlists.urls')),
     path('api/v1/category/', include('apps.categories.urls')),
     path('api/v1/payments/', include('apps.payments.urls')),
+    path('api/v1/drivers/', include('apps.drivers.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
