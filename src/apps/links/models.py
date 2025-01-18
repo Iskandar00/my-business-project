@@ -5,6 +5,7 @@ from rest_framework import serializers
 
 from apps.general.models import General
 from apps.general.unique_id import generate_unique_id
+from apps.users.models import CustomUser
 
 
 class Link(models.Model):
@@ -20,6 +21,7 @@ class Link(models.Model):
         limit_choices_to={
             'is_active': True,
             'is_deleted': False,
+            'role': CustomUser.RoleChoices.Admin.value
         },
         related_name='links',
     )

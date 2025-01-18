@@ -75,14 +75,15 @@ class Order(models.Model):
     def clean(self):
         if not self.link and not self.product:
             raise ValidationError({"product": "Either 'link' or 'product' must be provided."})
+        self.assign_operator(self.operator.id)
 
     def save(self, *args, **kwargs):
         self.full_clean()
         with transaction.atomic():
             if self.link:
                 self._update_admin_balance()
-                if self.operator:
-                    self._update_operator_balance()
+            if self.operator:
+                self._update_operator_balance()
 
             super().save(*args, **kwargs)
 
@@ -116,13 +117,11 @@ class Order(models.Model):
         self.operator.save()
 
     def assign_operator(self, user_id):
-        user = CustomUser.objects.filter(id=user_id, role=CustomUser.RoleChoices.Operator).first()
-        if not user:
-            raise ValidationError("The selected user is not a valid operator.")
-        if self.operator:
-            raise ValidationError("Operator has already been assigned.")
+        try:
+            user = CustomUser.objects.get(id=user_id, role=CustomUser.RoleChoices.Operator)
+        except:
+            raise ValidationError({"operator":"The selected user is not a valid operator."})
         self.operator = user
-        self.save()
 
     def __str__(self):
         return f"Order {self.id} for {self.buyer_name} from {self.get_area_display()}"
