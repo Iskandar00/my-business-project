@@ -60,6 +60,11 @@ class CreateOrderView(GenericAPIView):
         return Response(product_data, status=200)
 
     def post(self, request):
+        link_id = request.query_params.get('link')
+        product_id = request.query_params.get('product')
+
+        if not link_id and not product_id:
+            return Response({'error': 'Both link and product parameters are missing.'}, status=400)
         serializer = self.get_serializer(data=request.data, context={"request":request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
