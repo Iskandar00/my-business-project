@@ -1,8 +1,9 @@
 from django.core.validators import RegexValidator, MinValueValidator
 from django.db import models, transaction
 from django.core.exceptions import ValidationError
-from apps.users.models import CustomUser
+from rest_framework import serializers
 
+from apps.users.models import CustomUser
 from apps.general.models import General
 
 
@@ -74,8 +75,12 @@ class Order(models.Model):
 
     def clean(self):
         if not self.link and not self.product:
-            raise ValidationError({"product": "Either 'link' or 'product' must be provided."})
-        self.assign_operator(self.operator.id)
+            try:
+                raise ValidationError({"product": "Either 'link' or 'product' must be provided."})
+            except:
+                raise serializers.ValidationError({"product": "Either 'link' or 'product' must be provided."})
+        if self.operator:
+            self.assign_operator(self.operator.id)
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -117,10 +122,12 @@ class Order(models.Model):
         self.operator.save()
 
     def assign_operator(self, user_id):
-        try:
-            user = CustomUser.objects.get(id=user_id, role=CustomUser.RoleChoices.Operator)
-        except:
-            raise ValidationError({"operator":"The selected user is not a valid operator."})
+        user = CustomUser.objects.filter(id=user_id).first()
+        if not user or user.role != CustomUser.RoleChoices.Operator.value:
+            try:
+                raise ValidationError({"operator":"The selected user is not a valid operator."})
+            except:
+                raise serializers.ValidationError({"operator":"The selected user is not a valid operator."})
         self.operator = user
 
     def __str__(self):
