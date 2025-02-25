@@ -67,6 +67,7 @@ class RegisterSerializer(VerifyCodeSerializer):
     password = serializers.CharField(max_length=128, validators=[validate_password], write_only=True)
     refresh = serializers.CharField(read_only=True)
     access = serializers.CharField(read_only=True)
+    role = serializers.CharField(read_only=True)
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -80,5 +81,7 @@ class RegisterSerializer(VerifyCodeSerializer):
         tokens = generate_jwt_tokens(user)
 
         attrs = {**attrs, **tokens}
+
+        attrs['role'] = user.role
 
         return attrs

@@ -18,7 +18,7 @@ class CustomUser(AbstractUser):
         Deliverer = 'deliverer'
         Operator = 'operator'
 
-    role = models.CharField(max_length=32, choices=RoleChoices.choices)
+    role = models.CharField(max_length=32, choices=RoleChoices.choices, default=RoleChoices.Admin)
 
     fullname = models.CharField(max_length=150)
 
